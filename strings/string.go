@@ -1,16 +1,12 @@
 package strings
 
 import (
+	"crypto/rand"
 	"encoding/json"
 	"fmt"
-	"math/rand"
+	"math/big"
 	"strings"
-	"time"
 )
-
-func init() {
-	rand.Seed(time.Now().UnixNano())
-}
 
 func IIf(b bool, n, m string) string {
 	if b {
@@ -59,14 +55,18 @@ func SetToList(set map[string]bool) []string {
 
 var letterRunes = []rune("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
 
-func RandString(n int) string {
+func RandString(n int) (string, error) {
 	b := make([]rune, n)
-
 	for i := range b {
-		b[i] = letterRunes[rand.Intn(len(letterRunes))]
+		// 使用crypto/rand生成随机数
+		num, err := rand.Int(rand.Reader, big.NewInt(int64(len(letterRunes))))
+		if err != nil {
+			return "", err // 返回错误
+		}
+		b[i] = letterRunes[num.Int64()]
 	}
 
-	return string(b)
+	return string(b), nil
 }
 
 func ShortNumStr(n int64) string {
