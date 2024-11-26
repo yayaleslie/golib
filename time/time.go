@@ -1,4 +1,4 @@
-package time2
+package time
 
 import (
 	"database/sql/driver"
@@ -75,22 +75,15 @@ func (t Time) Add(d time.Duration) Time {
 	return t
 }
 
-func (t Time) AddDate(years int, months int, days int) Time {
-	t.Time = t.Time.AddDate(years, months, days)
-	return t
-}
-
-// DayStart 一天的开始
 func (t Time) DayStart() Time {
 	locDate := t.Time.Format(DateLayout)
-	locDayStart, _ := Parse(locDate, DateLayout, t.Location())
+	locDayStart, _ := Parse(locDate, DateLayout)
 	return locDayStart
 }
 
-// DayEnd 一天的结束
 func (t Time) DayEnd() Time {
 	locDate := t.Time.Format(DateLayout)
-	locDayStart, _ := Parse(locDate, DateLayout, t.Location())
+	locDayStart, _ := Parse(locDate, DateLayout)
 	return locDayStart.Add(Day - time.Duration(1))
 }
 
@@ -110,7 +103,7 @@ func (t Time) WeekStart() Time {
 	}
 
 	locDate := t.Time.Format(DateLayout)
-	weekStart, _ := Parse(locDate, DateLayout, t.Location())
+	weekStart, _ := Parse(locDate, DateLayout)
 	return weekStart.Add(-time.Duration(w-1) * Day)
 }
 
@@ -121,21 +114,8 @@ func (t Time) WeekEnd() Time {
 	}
 
 	locDate := t.Time.Format(DateLayout)
-	weekEnd, _ := Parse(locDate, DateLayout, t.Location())
+	weekEnd, _ := Parse(locDate, DateLayout)
 	return weekEnd.Add(time.Duration(7-w)*Day + Day - time.Duration(1))
-}
-
-func (t Time) MonthStart() Time {
-	y, m, _ := t.Date()
-	startDay := time.Date(y, m, 1, 0, 0, 0, 0, t.Location())
-	return Time{startDay}
-}
-
-func (t Time) MonthEnd() Time {
-	y, m, _ := t.Date()
-	startDay := time.Date(y, m, 1, 0, 0, 0, 0, t.Location())
-	endDay := startDay.AddDate(0, 1, -1)
-	return Time{endDay}
 }
 
 func (t Time) String(formats ...string) string {
@@ -145,10 +125,6 @@ func (t Time) String(formats ...string) string {
 	}
 
 	return t.Format(format)
-}
-
-func (t Time) IsToday() bool {
-	return t.DayStart() == Now().DayStart()
 }
 
 func Now() Time {
@@ -164,13 +140,13 @@ func Parse(v string, layout string, location ...*time.Location) (Time, error) {
 	return Time{t}, err
 }
 
-// ParseSec sec 秒
+// sec 秒
 func ParseSec(sec int64) Time {
 	t := time.Unix(sec, 0)
 	return Time{t}
 }
 
-// ParseMilli milli 毫秒
+// milli 毫秒
 func ParseMilli(milli int64) Time {
 	t := time.Unix(milli/1000, (milli%1000)*1e6)
 	return Time{t}
@@ -212,6 +188,7 @@ func SecToStr(v int64, format ...[]string) (string, []int64) {
 	}
 	if m > 0 && mStr != "" {
 		str += strconv.Itoa(int(m)) + mStr
+
 	}
 	if s > 0 && sStr != "" {
 		str += strconv.Itoa(int(s)) + sStr
